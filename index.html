@@ -1,10 +1,17 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema Avançado de Manutenção Veicular</title>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
+    
+    <!-- EmailJS SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -444,6 +451,7 @@
             <button class="tab" onclick="mostrarAba('lembretes')">⏰ Lembretes</button>
             <button class="tab" onclick="mostrarAba('scanner')">📱 Scanner</button>
             <button class="tab" onclick="mostrarAba('calculadora')">🧮 Calc. KM</button>
+            <button class="tab" onclick="mostrarAba('configuracoes')">⚙️ Config</button>
         </div>
 
         <!-- ABA DASHBOARD -->
@@ -791,6 +799,128 @@
                 </div>
             </div>
         </div>
+
+        <!-- ABA CONFIGURAÇÕES -->
+        <div id="configuracoes" class="tab-content">
+            <div class="form-section">
+                <h2>🔥 Configuração Firebase</h2>
+                <p>Configure o Firebase para backup automático na nuvem e sincronização entre dispositivos</p>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="firebaseApiKey">API Key:</label>
+                        <input type="text" id="firebaseApiKey" placeholder="AIzaSy...">
+                    </div>
+                    <div class="form-group">
+                        <label for="firebaseAuthDomain">Auth Domain:</label>
+                        <input type="text" id="firebaseAuthDomain" placeholder="seu-projeto.firebaseapp.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="firebaseProjectId">Project ID:</label>
+                        <input type="text" id="firebaseProjectId" placeholder="seu-projeto">
+                    </div>
+                    <div class="form-group">
+                        <label for="firebaseStorageBucket">Storage Bucket:</label>
+                        <input type="text" id="firebaseStorageBucket" placeholder="seu-projeto.appspot.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="firebaseMessagingSenderId">Messaging Sender ID:</label>
+                        <input type="text" id="firebaseMessagingSenderId" placeholder="123456789">
+                    </div>
+                    <div class="form-group">
+                        <label for="firebaseAppId">App ID:</label>
+                        <input type="text" id="firebaseAppId" placeholder="1:123456789:web:abc123">
+                    </div>
+                </div>
+                <button type="button" class="btn" onclick="conectarFirebase()">🔗 Conectar Firebase</button>
+                <button type="button" class="btn btn-warning" onclick="testarFirebase()">🧪 Testar Conexão</button>
+            </div>
+
+            <div class="form-section">
+                <h2>📧 Configuração EmailJS</h2>
+                <p>Configure o EmailJS para envio real de lembretes por email</p>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="emailjsUserId">User ID (Public Key):</label>
+                        <input type="text" id="emailjsUserId" placeholder="user_abc123xyz">
+                    </div>
+                    <div class="form-group">
+                        <label for="emailjsServiceId">Service ID:</label>
+                        <input type="text" id="emailjsServiceId" placeholder="service_gmail">
+                    </div>
+                    <div class="form-group">
+                        <label for="emailjsTemplateId">Template ID:</label>
+                        <input type="text" id="emailjsTemplateId" placeholder="template_abc123">
+                    </div>
+                </div>
+                <button type="button" class="btn" onclick="conectarEmailJS()">📧 Conectar EmailJS</button>
+                <button type="button" class="btn btn-warning" onclick="testarEmailJS()">📬 Enviar Teste</button>
+            </div>
+
+            <div class="form-section">
+                <h2>📱 Configuração de Usuário</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="userEmail">Seu Email:</label>
+                        <input type="email" id="userEmail" placeholder="seu@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="userName">Seu Nome:</label>
+                        <input type="text" id="userName" placeholder="João Silva">
+                    </div>
+                    <div class="form-group">
+                        <label for="carModel">Modelo do Carro:</label>
+                        <input type="text" id="carModel" placeholder="Honda Civic 2020">
+                    </div>
+                </div>
+                <button type="button" class="btn" onclick="salvarDadosUsuario()">💾 Salvar Dados</button>
+            </div>
+
+            <div class="form-section">
+                <h3>📊 Status das Conexões</h3>
+                <div class="stats">
+                    <div class="stat-card" id="statusFirebase">
+                        <div class="stat-number">❌</div>
+                        <div>Firebase</div>
+                    </div>
+                    <div class="stat-card" id="statusEmailJS">
+                        <div class="stat-number">❌</div>
+                        <div>EmailJS</div>
+                    </div>
+                    <div class="stat-card" id="statusSync">
+                        <div class="stat-number">📴</div>
+                        <div>Sincronização</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3>📖 Como Configurar</h3>
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 10px;">
+                    <h4>🔥 Firebase (2 minutos):</h4>
+                    <ol>
+                        <li>Acesse <a href="https://console.firebase.google.com" target="_blank">console.firebase.google.com</a></li>
+                        <li>Clique em "Criar projeto" ou "Add project"</li>
+                        <li>Nome do projeto: "manutencao-veicular"</li>
+                        <li>Vá em "Project Settings" > "General" > "Your apps"</li>
+                        <li>Clique em "Web app" (</>) </li>
+                        <li>Copie as chaves e cole aqui</li>
+                        <li>Vá em "Firestore Database" > "Create database" > "Start in test mode"</li>
+                    </ol>
+
+                    <h4 style="margin-top: 20px;">📧 EmailJS (3 minutos):</h4>
+                    <ol>
+                        <li>Acesse <a href="https://www.emailjs.com" target="_blank">emailjs.com</a></li>
+                        <li>Crie conta grátis</li>
+                        <li>Conecte seu Gmail em "Email Services"</li>
+                        <li>Crie um template em "Email Templates"</li>
+                        <li>Copie User ID, Service ID e Template ID</li>
+                        <li>Cole aqui e teste!</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Modais -->
@@ -853,19 +983,303 @@
         };
         let itemEditando = null;
         let lastBackup = localStorage.getItem('lastBackup');
+        
+        // Configurações Firebase e EmailJS
+        let firebaseConfig = JSON.parse(localStorage.getItem('firebaseConfig')) || {};
+        let emailjsConfig = JSON.parse(localStorage.getItem('emailjsConfig')) || {};
+        let userConfig = JSON.parse(localStorage.getItem('userConfig')) || {};
+        let db = null;
+        let firebaseConnected = false;
+        let emailjsConnected = false;
 
         // Inicialização
         document.addEventListener('DOMContentLoaded', function() {
             carregarDados();
+            carregarConfiguracoes();
+            inicializarFirebase();
+            inicializarEmailJS();
             atualizarTudo();
             configurarEventos();
             inicializarScanner();
             verificarLembretes();
             atualizarBackupStatus();
+            atualizarStatusConexoes();
             
             // Data atual como padrão
             document.getElementById('dataTroca').valueAsDate = new Date();
         });
+
+        // ===================== FIREBASE =====================
+        function carregarConfiguracoes() {
+            const firebase = JSON.parse(localStorage.getItem('firebaseConfig')) || {};
+            const emailjs = JSON.parse(localStorage.getItem('emailjsConfig')) || {};
+            const user = JSON.parse(localStorage.getItem('userConfig')) || {};
+            
+            // Preencher campos Firebase
+            document.getElementById('firebaseApiKey').value = firebase.apiKey || '';
+            document.getElementById('firebaseAuthDomain').value = firebase.authDomain || '';
+            document.getElementById('firebaseProjectId').value = firebase.projectId || '';
+            document.getElementById('firebaseStorageBucket').value = firebase.storageBucket || '';
+            document.getElementById('firebaseMessagingSenderId').value = firebase.messagingSenderId || '';
+            document.getElementById('firebaseAppId').value = firebase.appId || '';
+            
+            // Preencher campos EmailJS
+            document.getElementById('emailjsUserId').value = emailjs.userId || '';
+            document.getElementById('emailjsServiceId').value = emailjs.serviceId || '';
+            document.getElementById('emailjsTemplateId').value = emailjs.templateId || '';
+            
+            // Preencher dados do usuário
+            document.getElementById('userEmail').value = user.email || '';
+            document.getElementById('userName').value = user.name || '';
+            document.getElementById('carModel').value = user.carModel || '';
+        }
+
+        function conectarFirebase() {
+            const config = {
+                apiKey: document.getElementById('firebaseApiKey').value,
+                authDomain: document.getElementById('firebaseAuthDomain').value,
+                projectId: document.getElementById('firebaseProjectId').value,
+                storageBucket: document.getElementById('firebaseStorageBucket').value,
+                messagingSenderId: document.getElementById('firebaseMessagingSenderId').value,
+                appId: document.getElementById('firebaseAppId').value
+            };
+            
+            if (!config.apiKey || !config.projectId) {
+                mostrarNotificacao('❌ Preencha todos os campos do Firebase!', 'error');
+                return;
+            }
+            
+            try {
+                if (firebase.apps.length === 0) {
+                    firebase.initializeApp(config);
+                }
+                db = firebase.firestore();
+                firebaseConnected = true;
+                
+                localStorage.setItem('firebaseConfig', JSON.stringify(config));
+                mostrarNotificacao('🔥 Firebase conectado com sucesso!');
+                atualizarStatusConexoes();
+                
+                // Sincronizar dados existentes
+                sincronizarComFirebase();
+                
+            } catch (error) {
+                mostrarNotificacao('❌ Erro ao conectar Firebase: ' + error.message, 'error');
+                console.error('Erro Firebase:', error);
+            }
+        }
+
+        function inicializarFirebase() {
+            const config = JSON.parse(localStorage.getItem('firebaseConfig')) || {};
+            if (config.apiKey && config.projectId) {
+                try {
+                    if (firebase.apps.length === 0) {
+                        firebase.initializeApp(config);
+                    }
+                    db = firebase.firestore();
+                    firebaseConnected = true;
+                    atualizarStatusConexoes();
+                    
+                    // Carregar dados do Firebase
+                    carregarDadosFirebase();
+                    
+                } catch (error) {
+                    console.error('Erro ao inicializar Firebase:', error);
+                }
+            }
+        }
+
+        function testarFirebase() {
+            if (!firebaseConnected) {
+                mostrarNotificacao('❌ Firebase não conectado!', 'error');
+                return;
+            }
+            
+            // Teste simples de escrita e leitura
+            db.collection('teste').doc('conexao').set({
+                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                status: 'ok'
+            }).then(() => {
+                mostrarNotificação('✅ Firebase funcionando perfeitamente!');
+            }).catch(error => {
+                mostrarNotificacao('❌ Erro no teste: ' + error.message, 'error');
+            });
+        }
+
+        function sincronizarComFirebase() {
+            if (!firebaseConnected || !db) return;
+            
+            const userId = userConfig.email || 'usuario_anonimo';
+            
+            // Salvar dados no Firebase
+            db.collection('usuarios').doc(userId).set({
+                manutencoes: manutencoes,
+                configuracoes: configuracoes,
+                ultimaAtualizacao: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(() => {
+                console.log('Dados sincronizados com Firebase');
+                atualizarBackupStatus('sincronizado');
+            }).catch(error => {
+                console.error('Erro na sincronização:', error);
+            });
+        }
+
+        function carregarDadosFirebase() {
+            if (!firebaseConnected || !db) return;
+            
+            const userId = userConfig.email || 'usuario_anonimo';
+            
+            db.collection('usuarios').doc(userId).get().then(doc => {
+                if (doc.exists) {
+                    const dados = doc.data();
+                    
+                    // Verificar qual dado é mais recente
+                    const localUpdate = localStorage.getItem('lastUpdate');
+                    const firebaseUpdate = dados.ultimaAtualizacao?.toDate();
+                    
+                    if (!localUpdate || (firebaseUpdate && firebaseUpdate > new Date(localUpdate))) {
+                        manutencoes = dados.manutencoes || [];
+                        configuracoes = {...configuracoes, ...dados.configuracoes};
+                        
+                        salvarDados();
+                        atualizarTudo();
+                        mostrarNotificacao('☁️ Dados carregados da nuvem!');
+                    }
+                }
+            }).catch(error => {
+                console.error('Erro ao carregar dados do Firebase:', error);
+            });
+        }
+
+        // ===================== EMAILJS =====================
+        function conectarEmailJS() {
+            const config = {
+                userId: document.getElementById('emailjsUserId').value,
+                serviceId: document.getElementById('emailjsServiceId').value,
+                templateId: document.getElementById('emailjsTemplateId').value
+            };
+            
+            if (!config.userId || !config.serviceId || !config.templateId) {
+                mostrarNotificacao('❌ Preencha todos os campos do EmailJS!', 'error');
+                return;
+            }
+            
+            try {
+                emailjs.init(config.userId);
+                emailjsConfig = config;
+                emailjsConnected = true;
+                
+                localStorage.setItem('emailjsConfig', JSON.stringify(config));
+                mostrarNotificacao('📧 EmailJS conectado com sucesso!');
+                atualizarStatusConexoes();
+                
+            } catch (error) {
+                mostrarNotificacao('❌ Erro ao conectar EmailJS: ' + error.message, 'error');
+                console.error('Erro EmailJS:', error);
+            }
+        }
+
+        function inicializarEmailJS() {
+            const config = JSON.parse(localStorage.getItem('emailjsConfig')) || {};
+            if (config.userId) {
+                try {
+                    emailjs.init(config.userId);
+                    emailjsConfig = config;
+                    emailjsConnected = true;
+                    atualizarStatusConexoes();
+                } catch (error) {
+                    console.error('Erro ao inicializar EmailJS:', error);
+                }
+            }
+        }
+
+        function testarEmailJS() {
+            if (!emailjsConnected) {
+                mostrarNotificacao('❌ EmailJS não conectado!', 'error');
+                return;
+            }
+            
+            const templateParams = {
+                to_email: userConfig.email || 'teste@teste.com',
+                to_name: userConfig.name || 'Usuário',
+                car_model: userConfig.carModel || 'Seu Carro',
+                message: 'Este é um teste do sistema de lembretes. Funcionando perfeitamente! 🚗',
+                subject: '✅ Teste - Sistema de Manutenção Veicular'
+            };
+            
+            emailjs.send(emailjsConfig.serviceId, emailjsConfig.templateId, templateParams)
+                .then(() => {
+                    mostrarNotificacao('📧 Email de teste enviado com sucesso!');
+                })
+                .catch(error => {
+                    mostrarNotificacao('❌ Erro ao enviar email: ' + error.text, 'error');
+                    console.error('Erro EmailJS:', error);
+                });
+        }
+
+        function enviarLembreteReal(manutencao) {
+            if (!emailjsConnected || !userConfig.email) return false;
+            
+            const status = calcularStatus(manutencao);
+            const templateParams = {
+                to_email: userConfig.email,
+                to_name: userConfig.name || 'Proprietário',
+                car_model: userConfig.carModel || 'Seu Veículo',
+                item_name: manutencao.item,
+                sistema: manutencao.sistema,
+                status_message: status.texto,
+                data_troca: formatarData(manutencao.dataTroca),
+                subject: `🚗 Lembrete: ${manutencao.item} precisa de atenção`
+            };
+            
+            emailjs.send(emailjsConfig.serviceId, emailjsConfig.templateId, templateParams)
+                .then(() => {
+                    console.log('Lembrete enviado para:', manutencao.item);
+                })
+                .catch(error => {
+                    console.error('Erro ao enviar lembrete:', error);
+                });
+            
+            return true;
+        }
+
+        function salvarDadosUsuario() {
+            userConfig = {
+                email: document.getElementById('userEmail').value,
+                name: document.getElementById('userName').value,
+                carModel: document.getElementById('carModel').value
+            };
+            
+            localStorage.setItem('userConfig', JSON.stringify(userConfig));
+            mostrarNotificacao('💾 Dados do usuário salvos!');
+            
+            // Atualizar configuração de lembretes
+            if (userConfig.email) {
+                document.getElementById('emailLembrete').value = userConfig.email;
+            }
+        }
+
+        function atualizarStatusConexoes() {
+            const statusFirebase = document.getElementById('statusFirebase');
+            const statusEmailJS = document.getElementById('statusEmailJS');
+            const statusSync = document.getElementById('statusSync');
+            
+            if (statusFirebase) {
+                statusFirebase.querySelector('.stat-number').textContent = firebaseConnected ? '✅' : '❌';
+                statusFirebase.className = `stat-card ${firebaseConnected ? 'success' : 'danger'}`;
+            }
+            
+            if (statusEmailJS) {
+                statusEmailJS.querySelector('.stat-number').textContent = emailjsConnected ? '✅' : '❌';
+                statusEmailJS.className = `stat-card ${emailjsConnected ? 'success' : 'danger'}`;
+            }
+            
+            if (statusSync) {
+                const syncStatus = firebaseConnected ? '☁️' : '📴';
+                statusSync.querySelector('.stat-number').textContent = syncStatus;
+                statusSync.className = `stat-card ${firebaseConnected ? 'success' : 'warning'}`;
+            }
+        }
 
         function configurarEventos() {
             // Formulário principal
@@ -1687,8 +2101,51 @@
             }
         }
 
+        function carregarDados() {
+            const dados = localStorage.getItem('manutencoes');
+            if (dados) {
+                manutencoes = JSON.parse(dados);
+            }
+            
+            const config = localStorage.getItem('configuracoes');
+            if (config) {
+                configuracoes = { ...configuracoes, ...JSON.parse(config) };
+            }
+            
+            const user = localStorage.getItem('userConfig');
+            if (user) {
+                userConfig = { ...userConfig, ...JSON.parse(user) };
+            }
+        }
+
+        function salvarConfiguracoes() {
+            localStorage.setItem('configuracoes', JSON.stringify(configuracoes));
+        }
+
+        function mostrarNotificacao(mensagem, tipo = 'success') {
+            const notificacao = document.createElement('div');
+            notificacao.className = `notification-toast ${tipo}`;
+            notificacao.textContent = mensagem;
+            document.body.appendChild(notificacao);
+            
+            setTimeout(() => {
+                notificacao.remove();
+            }, 3000);
+        }
+
+        // Fechar modal ao clicar fora
+        window.onclick = function(event) {
+            const modal = document.getElementById('modalEdicao');
+            if (event.target === modal) {
+                fecharModal();
+            }
+        }
+
         // Auto-backup a cada 5 minutos
         setInterval(realizarBackup, 5 * 60 * 1000);
+
+        // Auto-verificação de lembretes a cada hora
+        setInterval(verificarLembretes, 60 * 60 * 1000);
     </script>
 </body>
 </html>
